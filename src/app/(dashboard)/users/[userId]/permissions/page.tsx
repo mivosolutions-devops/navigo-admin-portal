@@ -1,12 +1,15 @@
 import { getQueryClient } from "@/lib/get-query-client";
 import { usersService } from "@/services";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import React, { FC } from "react";
+import React from "react";
 import Permissions from "./permissions";
 
-const PermissionsPage: FC<{
-  params: { userId: string };
-}> = ({ params: { userId } }) => {
+const PermissionsPage = async ({
+  params
+}: {
+  params: Promise<{ userId: string }>;
+}) => {
+  const { userId } = await params;
   const queryClient = getQueryClient();
 
   queryClient.prefetchQuery<{ user: TUserData }>({

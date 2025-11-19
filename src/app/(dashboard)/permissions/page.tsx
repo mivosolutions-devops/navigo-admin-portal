@@ -1,19 +1,22 @@
 import { getQueryClient } from "@/lib/get-query-client";
 import { permissionsService } from "@/services";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import React, { FC } from "react";
+import React from "react";
 import Permissions from "./permissions";
 
-const PermissionsPage: FC<{
-  searchParams?: { [key: string]: string | string[] | undefined };
-}> = ({ searchParams }) => {
-  const selectedPage = Number(searchParams?.page) || 1;
-  const limit = Number(searchParams?.limit) || 10;
+const PermissionsPage = async ({
+  searchParams
+}: {
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}) => {
+  const params = await searchParams;
+  const selectedPage = Number(params?.page) || 1;
+  const limit = Number(params?.limit) || 10;
 
   const queryClient = getQueryClient();
 
   queryClient.prefetchQuery<TPermissionsState>({
-    queryKey: ["permissions", searchParams],
+    queryKey: ["permissions", params],
     queryFn: () =>
       permissionsService.getPermissions({ page: selectedPage, limit })
   });
