@@ -3,14 +3,6 @@ import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { setUserState } from "@/lib/redux/features/user/userSlice";
 import { toast } from "sonner";
 import useLoading from "./useLoading";
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL
-} from "firebase/storage";
-import { v4 } from "uuid";
-import { useState } from "react";
 import { z } from "zod";
 import { AccountFormSchema } from "@/lib/schemas";
 
@@ -18,8 +10,6 @@ export const useCurrentUser = () => {
   const user = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
   const { loading } = useLoading();
-  const [uploadStatus, setUploadStatus] = useState("");
-  const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const fetchUserProfile = async () => {
     try {
@@ -64,62 +54,9 @@ export const useCurrentUser = () => {
     });
   };
 
-  const _handleUploadFile = (folder: string, file: any) => {
-    return new Promise((resolve, reject) => {
-      const storage = getStorage();
-      const storageRef = ref(storage, `/${folder}/${file.name}-${v4()}`);
-      const uploadTask = uploadBytesResumable(storageRef, file);
-
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress = Math.round(
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-          );
-          setUploadProgress(progress);
-          console.log(progress);
-
-          switch (snapshot.state) {
-            case "paused":
-              setUploadStatus("paused");
-            // break;
-            case "running":
-              setUploadStatus("uploading...");
-            // break;
-            case "canceled":
-              setUploadStatus("cancelled");
-            // break;
-            case "error":
-              setUploadStatus("error");
-            // break;
-            case "success":
-              setUploadStatus("success");
-            // break;
-          }
-        },
-        (error) => {
-          toast.error(error.message, { position: "top-center" });
-          reject(error);
-        },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref)
-            .then((url) => {
-              resolve(url);
-            })
-            .catch((error: any) => {
-              toast.error(error.message);
-              reject(error);
-            });
-        }
-      );
-    });
-  };
-
   return {
     user,
     loading,
-    uploadProgress,
-    uploadStatus,
     fetchUserProfile,
     updateUserProfile
   };
