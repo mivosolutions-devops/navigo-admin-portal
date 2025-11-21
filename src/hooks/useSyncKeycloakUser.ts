@@ -34,6 +34,8 @@ export const useSyncKeycloakUser = () => {
           // Load user info from Keycloak userinfo endpoint
           const userInfo = await keycloak.loadUserInfo();
 
+          console.log("userInfo", userInfo);
+
           // Decode token to get roles
           const tokenParsed = keycloak.tokenParsed;
 
@@ -67,12 +69,6 @@ export const useSyncKeycloakUser = () => {
             ? attributes.phoneNumber[0]
             : (attributes.phoneNumber as string | undefined) || "";
 
-          const picture = attributes.picture
-            ? Array.isArray(attributes.picture)
-              ? attributes.picture[0]
-              : attributes.picture
-            : "";
-
           // Store user account data in Redux
           dispatch(
             setUserState({
@@ -91,7 +87,7 @@ export const useSyncKeycloakUser = () => {
               lastName:
                 (userInfo as any).family_name || tokenParsed?.family_name || "",
               phoneNumber: phoneNumber || "",
-              profilePicture: picture || tokenParsed?.picture || "",
+              profilePicture: userInfo.profilePicture || "",
               roles: allRoles
             })
           );

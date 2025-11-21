@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import { Input } from "./ui/input";
 import { CiSearch } from "react-icons/ci";
 import {
@@ -23,6 +23,7 @@ import { DialogClose } from "./ui/dialog";
 import useQueryParams from "@/hooks/useQueryParams";
 import { useAuth } from "@/hooks/useAuth";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { Skeleton } from "./ui/skeleton";
 
 const Nav = () => {
   const { pathname } = useQueryParams();
@@ -107,19 +108,36 @@ const Nav = () => {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <div className='w-full flex items-center justify-start gap-3 cursor-pointer'>
-              <div className='p-2 rounded-full overflow-clip relative bg-emerald-500 flex items-center justify-center'>
-                {user?.profilePicture ? (
-                  <Image src={user.profilePicture} alt='user avatar' fill />
-                ) : (
-                  <User className='text-white w-4 h-4' />
-                )}
-              </div>
-              <div className='flex w-full font-medium flex-col items-start justify-center text-xs whitespace-nowrap'>
-                <span className='font-normal'>
-                  {user?.firstName} {user?.lastName}
-                </span>
-                <span className='text-emerald-500'>{user?.email}</span>
-              </div>
+              <Suspense
+                fallback={
+                  <>
+                    <Skeleton className='w-[4rem] h-[2.5rem] rounded-full overflow-clip relative' />
+                    <div className='flex w-full font-medium flex-col items-start justify-center text-xs whitespace-nowrap'>
+                      <Skeleton className='w-8' />
+                      <Skeleton className='w-8' />
+                    </div>
+                  </>
+                }
+              >
+                <div className='p-2 rounded-full overflow-clip relative bg-emerald-500 flex items-center justify-center w-9 h-8'>
+                  {user?.profilePicture ? (
+                    <Image
+                      src={user.profilePicture}
+                      alt='user avatar'
+                      fill
+                      className='w-full h-full object-cover'
+                    />
+                  ) : (
+                    <User className='text-white w-4 h-4' />
+                  )}
+                </div>
+                <div className='flex w-full font-medium flex-col items-start justify-center text-xs whitespace-nowrap'>
+                  <span className='font-normal'>
+                    {user?.firstName} {user?.lastName}
+                  </span>
+                  <span className='text-emerald-500'>{user?.email}</span>
+                </div>
+              </Suspense>
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='end' className='w-56'>
